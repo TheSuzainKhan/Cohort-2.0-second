@@ -8,7 +8,7 @@ const App = () => {
   // console.log("hello integration") // ye baar baar re-render hoga.
 
   function fetchNotes() {
-    axios.get('http://localhost:3000/api/notes')
+    axios.get('https://cohort-2-0-second.onrender.com/api/notes')
       .then((res) => {
         setNotes(res.data.note) //setNotes agar useEffect ke andar na ho useState ka varible change hone app component baar baar re render hoga.
       })
@@ -24,7 +24,7 @@ const App = () => {
 
     // console.log(title.value, description.value)
 
-    axios.post("http://localhost:3000/api/notes", {
+    axios.post("https://cohort-2-0-second.onrender.com/api/notes", {
       title: title.value,
       description: description.value
     })
@@ -36,7 +36,7 @@ const App = () => {
   }
 
   function handleDeleteNote(noteId) {
-    axios.delete("http://localhost:3000/api/notes/" + noteId)
+    axios.delete("https://cohort-2-0-second.onrender.com/api/notes/" + noteId)
       .then(res => {
         console.log(res.data)
 
@@ -46,7 +46,7 @@ const App = () => {
 
   function handleUpdateNote(noteId, newDescription) {
 
-    axios.patch("http://localhost:3000/api/notes/" + noteId, {
+    axios.patch("https://cohort-2-0-second.onrender.com/api/notes/" + noteId, {
       description: newDescription
     })
       .then(res => {
