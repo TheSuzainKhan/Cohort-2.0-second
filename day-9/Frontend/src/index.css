@@ -31,3 +31,9 @@ html{
   max-width: 20rem;
   color: rgb(255, 253, 249);
 }
+.note-create-form {
+  display: flex;
+  gap: 2rem;
+  padding-inline: 3rem;
+  padding-block: 2rem;
+}

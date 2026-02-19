@@ -3,12 +3,14 @@
 const express = require("express")
 const noteModel = require("./models/note.model")
 const cors = require('cors')
+const path = require("path")
 
 
 const app = express()
 app.use(cors())
 app.use(express.json())
-
+app.use(express.static("./public")) // ye middleware public folder ke andar jitni bhi files he unhe publically available kara deti he matlab, jo bhi index, css, html files he unke api ke response me wo file chali jayngi.
+//is middleware se user public folder ke andar ke andar jitni bhi resoureces he unhe access kar sakta he.
 
 /**
  * - POST /api/notes
@@ -74,6 +76,12 @@ app.patch("/api/notes/:id", async (req,res)=> {
     res.status(200).json({
         message: "note updated successfully"
     })
+})
+
+console.log(__dirname)  //__dirname jis file me likhte he, wo file konse folder tak he us tak ka path de deti he. , src folder tak ka path dedegi.
+
+app.use("*name",(req,res)=> { //wild card api jab chalegi jab wo api available nhi hogi uske response me html file bhejenge., esi req aati he jinko program nhi kia to index.html file bhj dena.
+    res.sendFile(path.join(__dirname, "..", "/public/index.html" )) // .. matlab src se folder se bahar ane ke liye.
 })
 
 module.exports = app
