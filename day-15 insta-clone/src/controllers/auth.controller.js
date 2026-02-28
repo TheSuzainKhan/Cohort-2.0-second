@@ -1,6 +1,7 @@
 const userModel = require("../models/user.model")
-const crypto = require("crypto")
+// const crypto = require("crypto")
 const jwt = require("jsonwebtoken")
+const bcrypt = require("bcryptjs") //bcrypt ka use karenge for hashing password
 
 async function registerController(req, res) {
 
@@ -36,7 +37,8 @@ async function registerController(req, res) {
             })
     }
 
-    const hash = crypto.createHash("sha256").update(password).digest("hex")
+    // const hash = crypto.createHash("sha256").update(password).digest("hex")
+    const hash = await bcrypt.hash(password, 10)  //isse password bcrypt hojayga , salt me string me 10 bheja is mtlb hota he kitni layers me hashing hongi.
 
     //user ka data save karna database me.
     const user = await userModel.create({
@@ -94,9 +96,11 @@ const loginController = async (req,res)=> {
         })
     }
 
-    const hash = crypto.createHash("sha256").update(password).digest("hex")
+    // const hash = crypto.createHash("sha256").update(password).digest("hex")
 
-    const isPasswordValid = hash === user.password
+    // const isPasswordValid = hash === user.password
+
+    const isPasswordValid = await bcrypt.compare(password, user.password) // ye line login ke time par jo password aayga usko hash me pehle convert karegi then hash password ko user ke password se compare karaygi jo database me he.
 
     if(!isPasswordValid) {
         return res.status(401).json({
