@@ -10,7 +10,25 @@ const upload = multer({ storage: multer.memoryStorage() })
 
 const postRouter = express.Router()
 
+
+/**
+ * POST /api/posts [protected]
+ * - req.body = { caption,image-file }
+ */
 postRouter.post("/", upload.single('image'), postController.createPostController )
+
+/**
+ * GET /api/posts/ [protected]
+ */
+// is api pe jo user request karega uski saari post aajyngi.
+postRouter.get("/", postController.getPostController)
+
+/**
+ * GET /api/posts/details/:postId
+ * - return a detail about specific post with the id. also check whether the post belongs to the user that the request come from
+ */
+postRouter.get("/details/:postId", postController.getPostDetailsController)
+
 
 
 module.exports = postRouter
