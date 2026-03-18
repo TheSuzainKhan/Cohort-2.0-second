@@ -1,7 +1,8 @@
 import { RouterProvider } from "react-router"
-import {router} from "./app.routes"
+import { router } from "./app.routes"
 import "./features/shared/globle.scss"
 import { AuthProvider } from "./features/auth/auth.context"
+import { PostContextProvider } from "./features/posts/Post.context"
 
 function App() {
 
@@ -9,7 +10,9 @@ function App() {
   return (
 
     <AuthProvider>
-      <RouterProvider router={router}/>
+      <PostContextProvider>
+        <RouterProvider router={router} />
+      </PostContextProvider>
     </AuthProvider>
   )
 }

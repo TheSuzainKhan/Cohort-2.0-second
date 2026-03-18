@@ -36,9 +36,9 @@ async function createPostController(req, res) {
 
 }
 
-async function getPostController(req,res) {
+async function getPostController(req, res) {
 
-    
+
 
     const userId = req.user.id
 
@@ -54,7 +54,7 @@ async function getPostController(req,res) {
 
 }
 
-async function getPostDetailsController(req,res) {
+async function getPostDetailsController(req, res) {
 
 
     const userId = req.user.id
@@ -62,7 +62,7 @@ async function getPostDetailsController(req,res) {
 
     const post = await postModel.findById(postId)
 
-    if(!post) {
+    if (!post) {
         return res.status(404).json({
             message: "Post not found"
         })
@@ -70,7 +70,7 @@ async function getPostDetailsController(req,res) {
 
     const isValidUser = post.user.toString() === userId // post.user ki id ko pehle string me convert kara compare krne ke liye.
 
-    if(!isValidUser) {
+    if (!isValidUser) {
         return res.status(403).json({
             message: "Forbidden Content"
         })
@@ -84,14 +84,14 @@ async function getPostDetailsController(req,res) {
 
 }
 
-async function likePostController(req,res) {
+async function likePostController(req, res) {
 
     const username = req.user.username
     const postId = req.params.postId
 
     const post = await postModel.findById(postId)
 
-    if(!post) {
+    if (!post) {
         return res.status(404).json({
             message: "Post not Found"
         })
@@ -108,11 +108,39 @@ async function likePostController(req,res) {
     })
 }
 
+async function getFeedController(req, res) {
+
+    const user = req.user
+
+    const posts = await Promise.all((await postModel.find().populate("user").lean())
+        .map(async (post)=> {
+
+            /**
+             * typeOf post => mongooseObject hota he, and mongoose object me new property add nhi kar skte,islye lean() lagaaya jo mongooseObject ko Object me convert kar deta he, and phir usme property add kar skte he.
+             */
+
+            const isLiked = await likeModel.findOne({
+                user: user.username,
+                post: post._id
+            })
+
+            post.isLiked = Boolean(isLiked)
+
+            return post
+        }))
+    
+
+    res.status(200).json({
+        message: "posts fetched successfully",
+        posts
+    })
+}
 
 module.exports = {
     createPostController,
     getPostController,
     getPostDetailsController,
-    likePostController
+    likePostController,
+    getFeedController
 }
 
