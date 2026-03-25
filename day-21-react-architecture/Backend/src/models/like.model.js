@@ -14,8 +14,13 @@ const likeSchema = new mongoose.Schema({
     timestamps: true
 })
 
-likeSchema.index({posts:1, user: 1}, {unique: true})
+likeSchema.index({ post: 1, user: 1 }, { unique: true })
 
 const likeModel = mongoose.model("likes", likeSchema)
+
+// Keep Mongo indexes aligned with the schema during development.
+likeModel.syncIndexes().catch((error) => {
+    console.error("Failed to sync like indexes:", error)
+})
 
 module.exports = likeModel

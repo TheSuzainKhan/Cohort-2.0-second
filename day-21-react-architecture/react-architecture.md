@@ -4,7 +4,7 @@ react 4 layer architecture
     UI dikhana user ko and navigate karna.
 
 => Hook Layer-
-    Manage karna state and Api layer ko.    (api se call karke jo data mile mila he use kese store karna he state layer ke through wo manage hook layer karti he.)
+    Manage karna state and Api layer ko.    (api se call karke jo data mila he use kese store karna he state layer ke through wo manage hook layer karti he.)
 
 
 => State Layer=> storage(data ko store karti he)
