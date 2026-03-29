@@ -1,18 +1,9 @@
-import { useEffect, useRef, useState } from "react";
 import {
     FaceLandmarker,
     FilesetResolver
 } from "@mediapipe/tasks-vision";
 
-export default function FaceExpression() {
-    const videoRef = useRef(null);
-    const landmarkerRef = useRef(null);
-    const animationRef = useRef(null);
-    let stream;
-
-    const [ expression, setExpression ] = useState("Detecting...");
-
-    const init = async () => {
+export const init = async ({landmarkerRef, videoRef, streamRef, setExpression}) => {
         const vision = await FilesetResolver.forVisionTasks(
             "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
         );
@@ -30,14 +21,14 @@ export default function FaceExpression() {
             }
         );
 
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        videoRef.current.srcObject = stream;
+        streamRef.current = await navigator.mediaDevices.getUserMedia({ video: true });
+        videoRef.current.srcObject = streamRef.current;
         await videoRef.current.play();
 
-        detect();
+        detect({ landmarkerRef, videoRef, setExpression });
     };
 
-    const detect = () => {
+export const detect = ({landmarkerRef, videoRef, setExpression} = {}) => {
         if (!landmarkerRef.current || !videoRef.current) return;
 
         const results = landmarkerRef.current.detectForVideo(
@@ -58,8 +49,6 @@ export default function FaceExpression() {
             const frownLeft = getScore("mouthFrownLeft");
             const frownRight = getScore("mouthFrownRight");
 
-            console.log(getScore("mouthFrownLeft"))
-
             let currentExpression = "Neutral";
 
             if (smileLeft > 0.5 && smileRight > 0.5) {
@@ -70,41 +59,6 @@ export default function FaceExpression() {
                 currentExpression = "Sad 😢";
             }
 
-            setExpression(currentExpression);
+            setExpression?.(currentExpression);
         }
     };
-
-    useEffect(() => {
-        
-
-        init();
-
-        return () => {
-            if (animationRef.current) {
-                cancelAnimationFrame(animationRef.current);
-            }
-
-            if (landmarkerRef.current) {
-                landmarkerRef.current.close();
-            }
-
-            if (videoRef.current?.srcObject) {
-                videoRef.current.srcObject
-                    .getTracks()
-                    .forEach((track) => track.stop());
-            }
-        };
-    }, []);
-
-    return (
-        <div style={{ textAlign: "center" }}>
-            <video
-                ref={videoRef}
-                style={{ width: "400px", borderRadius: "12px" }}
-                playsInline
-            />
-            <h2>{expression}</h2>
-            <button onClick={detect} >Detect expression</button>
-        </div>
-    );
-}
