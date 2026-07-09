@@ -31,6 +31,14 @@ const ArrowUpIcon = () => (
     </svg>
 );
 
+const MenuIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5" aria-hidden="true">
+        <path d="M4 7h16" />
+        <path d="M4 12h16" />
+        <path d="M4 17h16" />
+    </svg>
+);
+
 const Dashboard = () => {
     const { handleLogout } = useAuth();
     const chat = useChat();
@@ -43,6 +51,7 @@ const Dashboard = () => {
     const pagination = useSelector((state) => state.chat.pagination);
 
     const [ chatInput, setChatInput ] = useState("");
+    const [ isSidebarOpen, setIsSidebarOpen ] = useState(false);
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
@@ -88,8 +97,17 @@ const Dashboard = () => {
 
     return (
         <main className="min-h-screen bg-[#0d0d0d] text-white">
-            <section className="flex h-screen">
-                <aside className="hidden w-[260px] flex-col border-r border-[#1b1b1b] bg-[#111111] p-4 md:flex">
+            <section className="flex min-h-screen flex-col md:h-screen md:flex-row">
+                {isSidebarOpen ? (
+                    <button
+                        type="button"
+                        onClick={() => setIsSidebarOpen(false)}
+                        className="fixed inset-0 z-30 bg-black/50 md:hidden"
+                        aria-label="Close sidebar"
+                    />
+                ) : null}
+
+                <aside className={`fixed inset-y-0 left-0 z-40 flex w-[min(82vw,320px)] flex-col border-r border-[#1b1b1b] bg-[#111111] p-4 transition-transform duration-200 md:static md:z-auto md:w-[260px] md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
                     <div className="mb-6 flex items-center gap-3">
                         <span className="h-3 w-3 rounded-full bg-[#20b2aa]" />
                         <h1 className="text-[22px] font-bold tracking-tight">Perplexity</h1>
@@ -97,7 +115,10 @@ const Dashboard = () => {
 
                     <button
                         type="button"
-                        onClick={chat.handleNewChat}
+                        onClick={() => {
+                            chat.handleNewChat();
+                            setIsSidebarOpen(false);
+                        }}
                         className="mb-6 flex w-full items-center gap-3 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] px-4 py-3 text-sm font-medium transition hover:bg-[#222222]"
                     >
                         <span className="text-lg leading-none">+</span>
@@ -114,7 +135,10 @@ const Dashboard = () => {
                             <div key={item.id} className="group relative">
                                 <button
                                     type="button"
-                                    onClick={() => chat.handleOpenChat(item.id, chats)}
+                                    onClick={() => {
+                                        chat.handleOpenChat(item.id, chats);
+                                        setIsSidebarOpen(false);
+                                    }}
                                     className={`w-full rounded-lg border-l-2 px-3 py-3 pr-10 text-left text-sm transition ${
                                         item.id === currentChatId
                                             ? "border-l-[#20b2aa] bg-[#1e1e1e] text-white"
@@ -149,7 +173,10 @@ const Dashboard = () => {
                         </div>
                         <button
                             type="button"
-                            onClick={handleLogout}
+                            onClick={() => {
+                                setIsSidebarOpen(false);
+                                handleLogout();
+                            }}
                             className="rounded-lg p-2 text-[#8a8a8a] transition hover:bg-[#1e1e1e] hover:text-white"
                             aria-label="Sign out"
                         >
@@ -159,18 +186,42 @@ const Dashboard = () => {
                 </aside>
 
                 <section className="relative flex min-w-0 flex-1 flex-col">
-                    <header className="border-b border-[#1b1b1b] px-6 py-4">
-                        <h2 className="truncate text-sm font-medium text-[#d7d7d7]">
-                            {currentChat?.title || "New Thread"}
-                        </h2>
+                    <header className="border-b border-[#1b1b1b] px-4 py-4 md:px-6">
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="flex min-w-0 items-center gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsSidebarOpen(true)}
+                                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#2a2a2a] bg-[#151515] text-[#d7d7d7] md:hidden"
+                                    aria-label="Open sidebar"
+                                >
+                                    <MenuIcon />
+                                </button>
+                                <div className="min-w-0">
+                                    <h2 className="truncate text-sm font-medium text-[#d7d7d7]">
+                                        {currentChat?.title || "New Thread"}
+                                    </h2>
+                                    <p className="text-xs text-[#6f6f6f] md:hidden">{user?.username || "Signed in"}</p>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={handleLogout}
+                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#2a2a2a] bg-[#151515] text-[#d7d7d7] md:hidden"
+                                aria-label="Sign out"
+                            >
+                                <ArrowRightIcon />
+                            </button>
+                        </div>
                     </header>
 
-                    <div className="messages flex-1 overflow-y-auto px-4 pb-48 pt-6 md:px-8">
+                    <div className="messages flex-1 overflow-y-auto px-4 py-5 md:px-8 md:py-6">
                         {!currentChatId ? (
-                            <div className="flex min-h-full flex-col items-center justify-center text-center">
-                                <h2 className="text-4xl font-bold tracking-tight text-white">What do you want to know?</h2>
-                                <p className="mt-3 text-base text-[#8a8a8a]">Ask anything. Get answers with sources.</p>
-                                <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                            <div className="flex min-h-full flex-col items-center justify-center py-10 text-center">
+                                <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">What do you want to know?</h2>
+                                <p className="mt-3 max-w-xl text-sm text-[#8a8a8a] sm:text-base">Ask anything. Get answers with sources.</p>
+                                <div className="mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-3">
                                     {suggestionChips.map((chip) => (
                                         <button
                                             key={chip}
@@ -186,7 +237,7 @@ const Dashboard = () => {
                         ) : (
                             <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
                                 {currentChat?.messages.map((message) => (
-                                    <div key={message.id} className={message.role === "user" ? "ml-auto max-w-[70%]" : "max-w-[75%]"}>
+                                    <div key={message.id} className={message.role === "user" ? "ml-auto max-w-[92%] sm:max-w-[80%] md:max-w-[70%]" : "max-w-[95%] sm:max-w-[88%] md:max-w-[75%]"}>
                                         {message.role === "ai" ? (
                                             <div className="flex items-start gap-3">
                                                 <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#123c39] text-xs text-[#7ce4dc]">
@@ -216,7 +267,7 @@ const Dashboard = () => {
                                                                         href={source.url}
                                                                         target="_blank"
                                                                         rel="noreferrer"
-                                                                        className="flex items-center gap-2 rounded-full border border-[#2a2a2a] bg-[#141414] px-3 py-2 text-xs text-[#cfcfcf] transition hover:bg-[#1c1c1c]"
+                                                                        className="flex max-w-full items-center gap-2 rounded-full border border-[#2a2a2a] bg-[#141414] px-3 py-2 text-xs text-[#cfcfcf] transition hover:bg-[#1c1c1c]"
                                                                     >
                                                                         <img
                                                                             src={`https://www.google.com/s2/favicons?domain=${hostname}&sz=64`}
@@ -254,8 +305,8 @@ const Dashboard = () => {
                         )}
                     </div>
 
-                    <footer className="absolute bottom-0 left-0 right-0 border-t border-[#1b1b1b] bg-[#0d0d0d]/95 px-4 py-4 backdrop-blur md:px-8">
-                        <div className="mx-auto max-w-4xl rounded-[24px] border border-[#2a2a2a] bg-[#111111] p-4">
+                    <footer className="border-t border-[#1b1b1b] bg-[#0d0d0d]/95 px-4 py-4 backdrop-blur md:px-8">
+                        <div className="mx-auto max-w-4xl rounded-[24px] border border-[#2a2a2a] bg-[#111111] p-3 sm:p-4">
                             <form onSubmit={handleSubmitMessage} className="flex items-end gap-3">
                                 <input
                                     type="text"
@@ -263,7 +314,7 @@ const Dashboard = () => {
                                     onChange={(event) => setChatInput(event.target.value)}
                                     placeholder="Ask anything..."
                                     disabled={isTyping}
-                                    className="min-h-12 flex-1 bg-transparent text-base text-white outline-none placeholder:text-[#666666] disabled:cursor-not-allowed"
+                                    className="min-h-12 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-[#666666] disabled:cursor-not-allowed sm:text-base"
                                 />
                                 <button
                                     type="submit"

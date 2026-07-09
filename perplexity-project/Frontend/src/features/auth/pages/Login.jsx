@@ -31,13 +31,13 @@ const Login = () => {
     }
 
     return (
-        <section className="min-h-screen bg-[#0d0d0d] px-6 py-10 text-white">
-            <div className="mx-auto flex min-h-[85vh] max-w-md items-center justify-center">
-                <div className="w-full">
+        <section className="min-h-screen bg-[#0d0d0d] px-4 py-6 text-white sm:px-6 sm:py-10">
+            <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-md items-center justify-center sm:min-h-[85vh]">
+                <div className="w-full rounded-[28px] border border-[#1c1c1c] bg-[#101010] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.35)] sm:p-8">
                     <div className="mb-10 text-center">
                         <div className="mb-4 flex items-center justify-center gap-3">
                             <span className="h-3 w-3 rounded-full bg-[#20b2aa]" />
-                            <h1 className="text-4xl font-bold tracking-tight">Perplexity</h1>
+                            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Perplexity</h1>
                         </div>
                         <p className="text-sm text-[#8b8b8b]">Sign in to continue your research threads.</p>
                     </div>
