@@ -70,6 +70,9 @@ const Register = () => {
                             required
                             className="w-full rounded-xl border border-[#2a2a2a] bg-[#111111] px-4 py-3 text-white outline-none transition focus:border-[#20b2aa] focus:ring-2 focus:ring-[#20b2aa]/30"
                         />
+                        <p className="text-xs text-[#7a7a7a]">
+                            Use at least 8 characters, including 1 uppercase letter and 1 special character.
+                        </p>
 
                         {error ? <p className="text-sm text-red-400">{error}</p> : null}
 

@@ -3,6 +3,20 @@ import { router } from "../../../app/app.routes";
 import { clearError, setError, setLoading, setUser } from "../auth.slice";
 import { getMe, login, logout, register } from "../service/auth.api";
 
+function getErrorMessage(error, fallbackMessage) {
+    const responseData = error.response?.data;
+
+    if (responseData?.message) {
+        return responseData.message;
+    }
+
+    if (Array.isArray(responseData?.errors) && responseData.errors.length > 0) {
+        return responseData.errors[0].msg || fallbackMessage;
+    }
+
+    return fallbackMessage;
+}
+
 export function useAuth() {
     const dispatch = useDispatch();
 
@@ -13,7 +27,7 @@ export function useAuth() {
             const data = await register({ email, username, password });
             return data;
         } catch (error) {
-            dispatch(setError(error.response?.data?.message || "Registration failed"));
+            dispatch(setError(getErrorMessage(error, "Registration failed")));
             throw error;
         } finally {
             dispatch(setLoading(false));
@@ -28,7 +42,7 @@ export function useAuth() {
             dispatch(setUser(data.data.user));
             return data;
         } catch (error) {
-            dispatch(setError(error.response?.data?.message || "Login failed"));
+            dispatch(setError(getErrorMessage(error, "Login failed")));
             throw error;
         } finally {
             dispatch(setLoading(false));
@@ -41,7 +55,7 @@ export function useAuth() {
             dispatch(setLoading(true));
             await logout();
         } catch (error) {
-            dispatch(setError(error.response?.data?.message || "Logout failed"));
+            dispatch(setError(getErrorMessage(error, "Logout failed")));
             throw error;
         } finally {
             dispatch(setUser(null));
