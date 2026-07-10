@@ -2,6 +2,9 @@ import jwt from "jsonwebtoken";
 import userModel from "../models/user.model.js";
 import { sendEmail } from "../services/mail.service.js";
 
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+const backendUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 8000}`;
+
 const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -31,18 +34,30 @@ export async function register(req, res) {
             process.env.JWT_SECRET
         );
 
-        await sendEmail({
-            to: email,
-            subject: "Welcome to Perplexity!",
-            html: `
-                <p>Hi ${username},</p>
-                <p>Thank you for registering at <strong>Perplexity</strong>. We're excited to have you on board!</p>
-                <p>Please verify your email address by clicking the link below:</p>
-                <a href="http://localhost:8000/api/auth/verify-email?token=${emailVerificationToken}">Verify Email</a>
-                <p>If you did not create an account, please ignore this email.</p>
-                <p>Best regards,<br>The Perplexity Team</p>
-            `,
-        });
+        const verificationUrl = `${backendUrl}/api/auth/verify-email?token=${emailVerificationToken}`;
+
+        try {
+            await sendEmail({
+                to: email,
+                subject: "Welcome to Perplexity!",
+                html: `
+                    <p>Hi ${username},</p>
+                    <p>Thank you for registering at <strong>Perplexity</strong>. We're excited to have you on board!</p>
+                    <p>Please verify your email address by clicking the link below:</p>
+                    <a href="${verificationUrl}">Verify Email</a>
+                    <p>If you did not create an account, please ignore this email.</p>
+                    <p>Best regards,<br>The Perplexity Team</p>
+                `,
+            });
+        } catch (mailError) {
+            console.error("Failed to send verification email:", mailError);
+            await userModel.findByIdAndDelete(user._id);
+
+            return res.status(500).json({
+                success: false,
+                message: "Account could not be created because the verification email failed to send. Please check your email configuration and try again.",
+            });
+        }
 
         return res.status(201).json({
             success: true,
@@ -56,6 +71,7 @@ export async function register(req, res) {
             },
         });
     } catch (error) {
+        console.error("Register error:", error);
         return res.status(500).json({
             success: false,
             message: "Internal server error",
@@ -115,6 +131,7 @@ export async function login(req, res) {
             },
         });
     } catch (error) {
+        console.error("Login error:", error);
         return res.status(500).json({
             success: false,
             message: "Internal server error",
@@ -135,6 +152,7 @@ export async function logout(req, res) {
             message: "Logout successful",
         });
     } catch (error) {
+        console.error("Logout error:", error);
         return res.status(500).json({
             success: false,
             message: "Internal server error",
@@ -160,6 +178,7 @@ export async function getMe(req, res) {
             data: { user },
         });
     } catch (error) {
+        console.error("Get me error:", error);
         return res.status(500).json({
             success: false,
             message: "Internal server error",
@@ -186,9 +205,10 @@ export async function verifyEmail(req, res) {
         return res.send(`
             <h1>Email Verified Successfully!</h1>
             <p>Your email has been verified. You can now log in to your account.</p>
-            <a href="http://localhost:5173/login">Go to Login</a>
+            <a href="${frontendUrl}/login">Go to Login</a>
         `);
     } catch (error) {
+        console.error("Verify email error:", error);
         return res.status(400).json({
             success: false,
             message: "Invalid or expired token",
